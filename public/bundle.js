@@ -114,6 +114,8 @@ var _withRouter = __webpack_require__(/*! react-router-dom/withRouter */ "./node
 
 var _withRouter2 = _interopRequireDefault(_withRouter);
 
+var _store = __webpack_require__(/*! ../store */ "./client/store.js");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -129,13 +131,6 @@ var GENERAL_CHANNEL = '/channels/2';
 var DOGS_CHANNEL = '/channels/3';
 var LUNCH_CHANNEL = '/channels/4';
 
-var mapStateToProps = function mapStateToProps(state) {
-    return {
-        messages: state.messages,
-        channels: state.channels
-    };
-};
-
 var ChannelList = function (_Component) {
     _inherits(ChannelList, _Component);
 
@@ -145,6 +140,7 @@ var ChannelList = function (_Component) {
         var _this = _possibleConstructorReturn(this, (ChannelList.__proto__ || Object.getPrototypeOf(ChannelList)).call(this));
 
         _this.getMessageCountByChannel = _this.getMessageCountByChannel.bind(_this);
+        _this.clickHandler = _this.clickHandler.bind(_this);
         return _this;
     }
 
@@ -154,9 +150,14 @@ var ChannelList = function (_Component) {
             var messageArray = this.props.messages.filter(function (message) {
                 return message.channelId === channelId;
             });
-            // console.log('[ChannelList] getMessageCountByChannel', channelId, messageArray.length);
 
             return messageArray.length;
+        }
+    }, {
+        key: 'clickHandler',
+        value: function clickHandler(channelName) {
+            console.log('[ ChannelList ] clickHandler', channelName);
+            this.props.updateChannelName(channelName);
         }
     }, {
         key: 'render',
@@ -173,7 +174,13 @@ var ChannelList = function (_Component) {
                         { key: channel.id },
                         _react2.default.createElement(
                             _reactRouterDom.NavLink,
-                            { to: '/channels/' + channel.id, activeClassName: 'active' },
+                            {
+                                onClick: function onClick() {
+                                    return _this2.clickHandler(channel.name);
+                                },
+                                to: '/channels/' + channel.id,
+                                activeClassName: 'active'
+                            },
                             _react2.default.createElement(
                                 'span',
                                 null,
@@ -195,7 +202,22 @@ var ChannelList = function (_Component) {
     return ChannelList;
 }(_react.Component);
 
-exports.default = (0, _withRouter2.default)((0, _reactRedux.connect)(mapStateToProps)(ChannelList));
+var mapStateToProps = function mapStateToProps(state) {
+    return {
+        messages: state.messages,
+        channels: state.channels
+    };
+};
+
+var mapDispatchToProps = function mapDispatchToProps(dispatch) {
+    return {
+        updateChannelName: function updateChannelName(name) {
+            return dispatch((0, _store.updateChannelName)(name));
+        }
+    };
+};
+
+exports.default = (0, _withRouter2.default)((0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(ChannelList));
 
 /***/ }),
 
@@ -280,7 +302,7 @@ var Main = function (_Component) {
                 'div',
                 null,
                 _react2.default.createElement(_Sidebar2.default, null),
-                _react2.default.createElement(_Navbar2.default, null),
+                _react2.default.createElement(_Navbar2.default, { name: this.props.name, channelName: this.props.channelName }),
                 _react2.default.createElement(
                     'main',
                     null,
@@ -312,7 +334,9 @@ var mapDispatchToProps = function mapDispatchToProps(dispatch) {
 
 var mapStateToProps = function mapStateToProps(state) {
     return {
-        messages: state.messages
+        messages: state.messages,
+        name: state.name,
+        channelName: state.channelName
     };
 };
 
@@ -592,10 +616,13 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Navbar = function (_Component) {
     _inherits(Navbar, _Component);
 
-    function Navbar() {
+    function Navbar(props) {
         _classCallCheck(this, Navbar);
 
-        return _possibleConstructorReturn(this, (Navbar.__proto__ || Object.getPrototypeOf(Navbar)).apply(this, arguments));
+        var _this = _possibleConstructorReturn(this, (Navbar.__proto__ || Object.getPrototypeOf(Navbar)).call(this, props));
+
+        _this.channelName = props.channelName;
+        return _this;
     }
 
     _createClass(Navbar, [{
@@ -607,7 +634,8 @@ var Navbar = function (_Component) {
                 _react2.default.createElement(
                     'h3',
                     null,
-                    '# channelname goes here'
+                    '# ',
+                    this.props.channelName
                 ),
                 _react2.default.createElement(_NameEntry2.default, null)
             );
@@ -1160,8 +1188,8 @@ var initialState = {
     channels: [],
     messages: [],
     newMessageEntry: '',
-    name: '',
-    channelName: ''
+    name: 'Guest',
+    channelName: 'generally_speaking'
 };
 
 // ACTION CREATORS ----------------------------------------
@@ -1191,7 +1219,7 @@ var updateName = exports.updateName = function updateName(name) {
 };
 
 var updateChannelName = exports.updateChannelName = function updateChannelName(name) {
-    console.log('updateChannelName', name);
+    console.log('updateChannelName name:', name);
 
     return { type: UPDATE_CHANNEL_NAME, name: name };
 };
@@ -1377,6 +1405,9 @@ var reducer = exports.reducer = function reducer() {
         case WRITE_MESSAGE:
             return _extends({}, state, { newMessageEntry: action.message });
         case GET_CHANNELS:
+            action.channels.sort(function (a, b) {
+                return a.id - b.id;
+            });
             console.log('[store] fetchChannels finished channels:', action.channels.length);
             return _extends({}, state, { channels: action.channels });
         case NEW_CHANNEL:

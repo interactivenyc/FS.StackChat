@@ -4,10 +4,6 @@ const morgan = require('morgan');
 const db = require('./db');
 const PORT = process.env.PORT || 8080;
 const app = express();
-
-console.log("HEROKU PORT next line...")
-console.log("HEROKU PORT ", PORT)
-
 const server = app.listen(PORT, () => console.log(`Feeling chatty on port ${PORT}`));
 const io = require('socket.io')(server);
 
@@ -33,18 +29,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api', require('./api'));
 
 // 404 middleware
-app.use((req, res, next) =>
-  path.extname(req.path).length > 0 ?
-    res.status(404).send('Not found') :
-    next()
-);
+app.use((req, res, next) => (path.extname(req.path).length > 0 ? res.status(404).send('Not found') : next()));
 
 // send index.html
-app.use('*', (req, res, next) =>
-  res.sendFile(path.join(__dirname, '..', 'public/index.html'))
-);
+app.use('*', (req, res, next) => res.sendFile(path.join(__dirname, '..', 'public/index.html')));
 
 // error handling endware
-app.use((err, req, res, next) =>
-  res.status(err.status || 500).send(err.message || 'Internal server error.')
-);
+app.use((err, req, res, next) => res.status(err.status || 500).send(err.message || 'Internal server error.'));

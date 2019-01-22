@@ -23,7 +23,7 @@ class Main extends Component {
         return (
             <div>
                 <Sidebar />
-                <Navbar />
+                <Navbar name={this.props.name} channelName={this.props.channelName} />
                 <main>
                     <Switch>
                         <Route path="/new-channel" component={NewChannelEntry} />
@@ -45,7 +45,9 @@ const mapDispatchToProps = (dispatch) => {
 
 const mapStateToProps = (state) => {
     return {
-        messages: state.messages
+        messages: state.messages,
+        name: state.name,
+        channelName: state.channelName
     };
 };
 

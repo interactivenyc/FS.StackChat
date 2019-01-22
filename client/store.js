@@ -16,8 +16,8 @@ const initialState = {
     channels: [],
     messages: [],
     newMessageEntry: '',
-    name: '',
-    channelName: ''
+    name: 'Guest',
+    channelName: 'generally_speaking'
 };
 
 // ACTION CREATORS ----------------------------------------
@@ -47,7 +47,7 @@ export const updateName = (name) => {
 };
 
 export const updateChannelName = (name) => {
-    console.log('updateChannelName', name);
+    console.log('updateChannelName name:', name);
 
     return { type: UPDATE_CHANNEL_NAME, name };
 };
@@ -126,6 +126,9 @@ export const reducer = (state = initialState, action) => {
         case WRITE_MESSAGE:
             return { ...state, newMessageEntry: action.message };
         case GET_CHANNELS:
+            action.channels.sort(function(a, b) {
+                return a.id - b.id;
+            });
             console.log('[store] fetchChannels finished channels:', action.channels.length);
             return { ...state, channels: action.channels };
         case NEW_CHANNEL:
