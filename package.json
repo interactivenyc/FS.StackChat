@@ -4,7 +4,7 @@
     "description": "A chatty appy chat app",
     "main": "index.js",
     "scripts": {
-        "start": "npm run start-server",
+        "start": "node server",
         "start-dev": "npm run start-server & npm run build-watch",
         "start-server": "nodemon server -w server",
         "build-watch": "webpack -w",
