@@ -1,3 +1,7 @@
+This app can be viewed at:
+
+http://inyc-stackchat.herokuapp.com
+
 # StackChat
 
 A chatty chat appy app.
